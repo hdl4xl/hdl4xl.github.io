@@ -5,10 +5,6 @@ const validPanels = new Set([...panels].map((panel) => panel.id));
 function activatePanel(panelId) {
   const nextPanel = validPanels.has(panelId) ? panelId : "schedule";
 
-  panels.forEach((panel) => {
-    panel.classList.toggle("is-active", panel.id === nextPanel);
-  });
-
   navLinks.forEach((link) => {
     const linkPanel = link.getAttribute("href").replace("#", "");
     link.classList.toggle("is-active", linkPanel === nextPanel);
@@ -20,6 +16,21 @@ window.addEventListener("hashchange", () => {
 });
 
 activatePanel(window.location.hash.slice(1));
+
+const panelObserver = new IntersectionObserver(
+  (entries) => {
+    const visiblePanel = entries
+      .filter((entry) => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+    if (visiblePanel) {
+      activatePanel(visiblePanel.target.id);
+    }
+  },
+  { threshold: [0.35, 0.6] },
+);
+
+panels.forEach((panel) => panelObserver.observe(panel));
 
 const calendarRoot = document.querySelector("[data-calendar]");
 

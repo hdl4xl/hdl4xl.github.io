@@ -18,8 +18,7 @@
 html,
 body {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
 }
 
 html {
@@ -28,11 +27,14 @@ html {
 
 body {
   position: relative;
+  min-height: 100%;
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--mono);
   line-height: 1.55;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body::before {
@@ -177,35 +179,20 @@ textarea {
   position: relative;
   z-index: 1;
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .panel {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: grid;
   place-items: center;
-  padding: 118px clamp(22px, 4vw, 52px) 42px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(18px) scale(0.985);
-  transition:
-    opacity 260ms ease,
-    visibility 260ms ease,
-    transform 260ms ease;
-}
-
-.panel.is-active {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
+  min-height: 100vh;
+  padding: 132px clamp(22px, 4vw, 52px) 72px;
+  scroll-margin-top: 20px;
 }
 
 .panel-shell {
   width: min(100%, 1180px);
-  max-height: calc(100vh - 160px);
-  overflow: hidden;
 }
 
 .panel-heading {
@@ -558,34 +545,57 @@ textarea {
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 768px) {
   .site-header {
     display: grid;
+    justify-content: start;
+    justify-items: start;
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .brand {
+    font-size: 0.9rem;
   }
 
   .nav-links {
+    display: grid;
     justify-content: start;
+    justify-items: start;
+    gap: 9px;
     width: 100%;
   }
 
   .nav-links a {
+    font-size: 0.78rem;
     text-align: left;
   }
 
+  .nav-links small {
+    font-size: 0.68rem;
+  }
+
   .panel {
-    padding: 148px 16px 18px;
+    min-height: auto;
+    padding: 220px 16px 72px;
   }
 
   .panel-shell {
-    max-height: calc(100vh - 174px);
+    width: 100%;
+  }
+
+  .panel-heading {
+    justify-items: center;
+    margin-left: 0;
+    text-align: center;
   }
 
   .panel-heading h1 {
-    font-size: 40px;
+    font-size: 4rem;
   }
 
   .panel-heading p:not(.eyebrow) {
-    display: none;
+    max-width: 28rem;
   }
 
   .calendar-toolbar {
