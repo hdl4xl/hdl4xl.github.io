@@ -301,19 +301,33 @@ if (calendarRoot) {
     if (state === "loading") {
       syncStatus.textContent = "正在同步云端数据";
       syncLogout.hidden = false;
+      showCurrentUid();
       return;
     }
 
     if (state === "synced") {
       syncStatus.textContent = `云端已同步：${cloud.user.email || "已登录"}`;
       syncLogout.hidden = false;
-      syncUserId.hidden = false;
-      syncUserId.textContent = `UID: ${cloud.user.uid}`;
+      showCurrentUid();
       return;
     }
 
     syncStatus.textContent = "云端连接异常";
-    syncLogin.hidden = false;
+    if (cloud.user) {
+      syncLogout.hidden = false;
+      showCurrentUid();
+    } else {
+      syncLogin.hidden = false;
+    }
+  }
+
+  function showCurrentUid() {
+    if (!cloud.user) {
+      return;
+    }
+
+    syncUserId.hidden = false;
+    syncUserId.textContent = `UID: ${cloud.user.uid}`;
   }
 
   function hasFirebaseConfig() {
