@@ -3,7 +3,7 @@ const navLinks = document.querySelectorAll(".nav-links a");
 const validPanels = new Set([...panels].map((panel) => panel.id));
 
 function activatePanel(panelId) {
-  const nextPanel = validPanels.has(panelId) ? panelId : "schedule";
+  const nextPanel = validPanels.has(panelId) ? panelId : "welcome";
 
   navLinks.forEach((link) => {
     const linkPanel = link.getAttribute("href").replace("#", "");

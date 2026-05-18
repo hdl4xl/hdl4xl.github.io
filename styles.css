@@ -195,6 +195,60 @@ textarea {
   width: min(100%, 1180px);
 }
 
+.panel-cover {
+  text-align: center;
+}
+
+.cover-shell {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  width: min(100%, 1100px);
+}
+
+.cover-shell h1 {
+  max-width: 11ch;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.98);
+  font-size: clamp(4.6rem, 13vw, 11.5rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.88;
+  text-shadow:
+    0 0 26px rgba(239, 76, 172, 0.38),
+    0 0 82px rgba(239, 76, 172, 0.24);
+}
+
+.cover-shell p:not(.eyebrow) {
+  max-width: 35rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+}
+
+.cover-link {
+  margin-top: 16px;
+  padding: 12px 18px;
+  color: var(--pink);
+  border: 1px solid rgba(239, 76, 172, 0.52);
+  background: rgba(239, 76, 172, 0.08);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.cover-link:hover,
+.cover-link:focus-visible {
+  color: #fff;
+  background: rgba(239, 76, 172, 0.18);
+  outline: 0;
+  box-shadow: 0 0 30px rgba(239, 76, 172, 0.32);
+}
+
 .panel-heading {
   display: grid;
   gap: 8px;
@@ -591,6 +645,10 @@ textarea {
   }
 
   .panel-heading h1 {
+    font-size: 4rem;
+  }
+
+  .cover-shell h1 {
     font-size: 4rem;
   }
 
