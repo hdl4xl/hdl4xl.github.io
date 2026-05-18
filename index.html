@@ -80,6 +80,12 @@
               <aside class="calendar-editor" aria-label="编辑日程">
                 <p class="eyebrow">Selected Day</p>
                 <h2 data-selected-date>请选择日期</h2>
+                <div class="sync-panel" data-sync-panel>
+                  <p data-sync-status>本地模式</p>
+                  <button class="ghost-button" type="button" data-sync-login>登录同步</button>
+                  <button class="ghost-button" type="button" data-sync-logout hidden>退出登录</button>
+                  <code data-sync-user-id hidden></code>
+                </div>
                 <label for="schedule-input">当天日程</label>
                 <textarea
                   id="schedule-input"
@@ -157,6 +163,7 @@
       </section>
     </main>
 
+    <script src="firebase-config.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
