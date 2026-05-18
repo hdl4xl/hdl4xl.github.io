@@ -3,301 +3,150 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>你的名字 | Personal Notes</title>
-    <meta
-      name="description"
-      content="一个用于存放个人感悟、理解、笔记和生活片段的个人网站。"
+    <title>hdl4xl LAB</title>
+    <meta name="description" content="hdl4xl 的个人日程、构思与资料存放空间。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header" aria-label="主导航">
-      <a class="brand" href="#top" aria-label="回到顶部">
-        <span>PERSONAL INDEX</span>
-        <strong>001</strong>
-      </a>
-      <nav class="nav-links">
-        <a href="#about">About</a>
-        <a href="#schedule">Schedule</a>
-        <a href="#ideas">Ideas</a>
-        <a href="#resources">Resources</a>
-        <a href="#hello">Hello</a>
+      <a class="brand" href="#schedule" aria-label="hdl4xl LAB 首页">hdl4xl LAB</a>
+      <nav class="nav-links" aria-label="页面导航">
+        <a href="#schedule">
+          <span>SCHEDULE</span>
+          <small>日程安排</small>
+        </a>
+        <a href="#ideas">
+          <span>IDEAS</span>
+          <small>构思</small>
+        </a>
+        <a href="#resources">
+          <span>RESOURCES</span>
+          <small>资料存放</small>
+        </a>
       </nav>
     </header>
 
-    <main id="top">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-          <p class="issue">Vol. 01 / Since 2026</p>
-          <h1 id="hero-title">Hello</h1>
-          <p class="hero-copy">
-            这里收集我对世界、学习、生活与自我的一些观察。不是标准答案，只是持续整理过的痕迹。
-          </p>
-        </div>
-      </section>
-
-      <section class="intro-grid" aria-label="网站概览">
-        <a class="intro-block" href="#schedule">
-          <p class="section-kicker">Schedule</p>
-          <h2>日程安排</h2>
-          <p>
-            记录近期要完成的事情、计划中的更新，以及值得保留的重要时间节点。
-          </p>
-          <span class="intro-arrow" aria-hidden="true">View</span>
-        </a>
-        <a class="intro-block" href="#ideas">
-          <p class="section-kicker">Ideas</p>
-          <h2>构思</h2>
-          <p>
-            存放尚未完全写成文章的想法、问题、主题和以后想继续展开的方向。
-          </p>
-          <span class="intro-arrow" aria-hidden="true">View</span>
-        </a>
-        <a class="intro-block" href="#resources">
-          <p class="section-kicker">Resources</p>
-          <h2>资料存放</h2>
-          <p>
-            整理公开资料、参考链接、阅读清单，以及和个人思考有关的素材。
-          </p>
-          <span class="intro-arrow" aria-hidden="true">View</span>
-        </a>
-      </section>
-
-      <section class="section" id="schedule" aria-labelledby="schedule-title">
-        <div class="section-heading">
-          <p class="section-number">A.01</p>
-          <h2 id="schedule-title">日程安排</h2>
-        </div>
-        <div class="calendar-app" data-calendar>
-          <div class="calendar-toolbar">
-            <div>
-              <p class="section-kicker">Calendar</p>
-              <h3 data-calendar-month>2026年5月</h3>
-            </div>
-            <div class="calendar-actions" aria-label="切换月份">
-              <button class="calendar-button" type="button" data-calendar-prev>上个月</button>
-              <button class="calendar-button" type="button" data-calendar-today>今天</button>
-              <button class="calendar-button" type="button" data-calendar-next>下个月</button>
-            </div>
+    <main class="lab-stage">
+      <section class="panel panel-schedule is-active" id="schedule" data-panel>
+        <div class="panel-shell">
+          <div class="panel-heading">
+            <p class="eyebrow">A.01 / SCHEDULE</p>
+            <h1>日程安排</h1>
+            <p>点击日历中的某一天，编辑并保存当天要做的事情。</p>
           </div>
 
-          <div class="calendar-layout">
-            <div class="calendar-main">
-              <div class="weekday-row" aria-hidden="true">
-                <span>日</span>
-                <span>一</span>
-                <span>二</span>
-                <span>三</span>
-                <span>四</span>
-                <span>五</span>
-                <span>六</span>
+          <div class="calendar-app" data-calendar>
+            <div class="calendar-toolbar">
+              <div>
+                <p class="eyebrow">Calendar</p>
+                <h2 data-calendar-month>2026年5月</h2>
               </div>
-              <div class="calendar-grid" data-calendar-grid aria-label="可编辑日历"></div>
+              <div class="calendar-actions" aria-label="切换月份">
+                <button class="ghost-button" type="button" data-calendar-prev>上个月</button>
+                <button class="ghost-button" type="button" data-calendar-today>今天</button>
+                <button class="ghost-button" type="button" data-calendar-next>下个月</button>
+              </div>
             </div>
 
-            <aside class="calendar-editor" aria-label="编辑日程">
-              <p class="section-kicker">Selected Day</p>
-              <h3 data-selected-date>请选择日期</h3>
-              <label for="schedule-input">当天日程</label>
-              <textarea
-                id="schedule-input"
-                data-schedule-input
-                rows="8"
-                placeholder="例如：上午整理文章；下午复盘本周计划"
-              ></textarea>
-              <div class="calendar-editor-actions">
-                <button class="calendar-save" type="button" data-save-schedule>保存</button>
-                <button class="calendar-button" type="button" data-clear-schedule>清空</button>
+            <div class="calendar-layout">
+              <div class="calendar-main">
+                <div class="weekday-row" aria-hidden="true">
+                  <span>日</span>
+                  <span>一</span>
+                  <span>二</span>
+                  <span>三</span>
+                  <span>四</span>
+                  <span>五</span>
+                  <span>六</span>
+                </div>
+                <div class="calendar-grid" data-calendar-grid aria-label="可编辑日历"></div>
               </div>
-              <p class="calendar-hint">保存后，内容会显示在对应日期下方，并保存在当前浏览器中。</p>
-              <p class="save-status" data-save-status aria-live="polite"></p>
-            </aside>
+
+              <aside class="calendar-editor" aria-label="编辑日程">
+                <p class="eyebrow">Selected Day</p>
+                <h2 data-selected-date>请选择日期</h2>
+                <label for="schedule-input">当天日程</label>
+                <textarea
+                  id="schedule-input"
+                  data-schedule-input
+                  rows="8"
+                  placeholder="例如：上午整理资料&#10;下午写一段个人感悟"
+                ></textarea>
+                <div class="editor-actions">
+                  <button class="primary-button" type="button" data-save-schedule>保存</button>
+                  <button class="ghost-button" type="button" data-clear-schedule>清空</button>
+                </div>
+                <p class="hint">保存后会显示在对应日期下面，并保存在当前浏览器中。</p>
+                <p class="save-status" data-save-status aria-live="polite"></p>
+              </aside>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="section" id="ideas" aria-labelledby="ideas-title">
-        <div class="section-heading">
-          <p class="section-number">B.02</p>
-          <h2 id="ideas-title">构思</h2>
-        </div>
-        <div class="idea-grid">
-          <article>
-            <span>Idea 01</span>
-            <h3>如何把零散想法整理成文章</h3>
-            <p>先保留问题，再补充观察，最后形成自己的判断。</p>
-          </article>
-          <article>
-            <span>Idea 02</span>
-            <h3>关于长期主义的真实感受</h3>
-            <p>长期不是慢，而是知道哪些事情值得反复投入。</p>
-          </article>
-          <article>
-            <span>Idea 03</span>
-            <h3>建立个人知识系统</h3>
-            <p>资料不是越多越好，关键是能被再次找到和重新使用。</p>
-          </article>
-        </div>
-      </section>
+      <section class="panel panel-ideas" id="ideas" data-panel>
+        <div class="panel-shell">
+          <div class="panel-heading">
+            <p class="eyebrow">B.02 / IDEAS</p>
+            <h1>构思</h1>
+            <p>把尚未成文的想法先保存下来，之后再慢慢展开。</p>
+          </div>
 
-      <section class="section resources-section" id="resources" aria-labelledby="resources-title">
-        <div class="section-heading">
-          <p class="section-number">C.03</p>
-          <h2 id="resources-title">资料存放</h2>
-        </div>
-        <ul class="resource-list">
-          <li>
-            <span>Reading</span>
-            <a href="#">阅读清单与书摘整理</a>
-          </li>
-          <li>
-            <span>Links</span>
-            <a href="#">常用网站、工具与参考链接</a>
-          </li>
-          <li>
-            <span>Notes</span>
-            <a href="#">学习资料、课程笔记和阶段总结</a>
-          </li>
-          <li>
-            <span>Archive</span>
-            <a href="#">旧文章、旧想法和待整理素材</a>
-          </li>
-        </ul>
-      </section>
-
-      <section class="section" id="about" aria-labelledby="about-title">
-        <div class="section-heading">
-          <p class="section-number">D.04</p>
-          <h2 id="about-title">About</h2>
-        </div>
-        <div class="about-layout">
-          <p class="lead">
-            我希望这个网站像一张不断更新的私人地图：记录我走过哪里、看见什么、理解了什么。
-          </p>
-          <div class="about-copy">
-            <p>
-              你可以在这里写自己的介绍：现在的身份、关注的方向、正在学习的东西，以及建立这个网站的原因。
-            </p>
-            <p>
-              语气不需要正式，也不需要写成简历。它更像是你给陌生读者留的一封短札，让别人知道你是谁、你在意什么。
-            </p>
+          <div class="idea-grid">
+            <article>
+              <span>IDEA 01</span>
+              <h2>如何把零散想法整理成文章</h2>
+              <p>先保留问题，再补充观察，最后形成自己的判断。</p>
+            </article>
+            <article>
+              <span>IDEA 02</span>
+              <h2>关于长期主义的真实感受</h2>
+              <p>长期不是慢，而是知道哪些事情值得反复投入。</p>
+            </article>
+            <article>
+              <span>IDEA 03</span>
+              <h2>建立个人知识系统</h2>
+              <p>资料不是越多越好，关键是能被再次找到和重新使用。</p>
+            </article>
           </div>
         </div>
       </section>
 
-      <section class="section" id="thoughts" aria-labelledby="thoughts-title">
-        <div class="section-heading">
-          <p class="section-number">E.05</p>
-          <h2 id="thoughts-title">Thoughts</h2>
-        </div>
-        <div class="article-list">
-          <article class="article-card" data-tag="growth">
-            <a href="#" aria-label="阅读文章：关于成长的一点理解">
-              <span class="article-meta">2026.05.18 / Growth</span>
-              <h3>关于成长的一点理解</h3>
-              <p>
-                成长不是突然变得厉害，而是在反复遇到同类问题时，开始拥有更清醒的处理方式。
-              </p>
-            </a>
-          </article>
-          <article class="article-card" data-tag="reading">
-            <a href="#" aria-label="阅读文章：读书时我真正想保存的东西">
-              <span class="article-meta">2026.04.22 / Reading</span>
-              <h3>读书时我真正想保存的东西</h3>
-              <p>
-                一本书带来的价值，有时不是结论，而是它迫使我重新组织自己已经知道的内容。
-              </p>
-            </a>
-          </article>
-          <article class="article-card" data-tag="life">
-            <a href="#" aria-label="阅读文章：一次普通散步后的记录">
-              <span class="article-meta">2026.03.10 / Life</span>
-              <h3>一次普通散步后的记录</h3>
-              <p>
-                生活里很多值得记录的东西并不宏大，只是某个下午、某段路、某个念头。
-              </p>
-            </a>
-          </article>
-        </div>
-      </section>
-
-      <section class="section notes-section" id="notes" aria-labelledby="notes-title">
-        <div class="section-heading">
-          <p class="section-number">F.06</p>
-          <h2 id="notes-title">Notes</h2>
-        </div>
-        <div class="note-board">
-          <button class="tag-button is-active" type="button" data-filter="all">All</button>
-          <button class="tag-button" type="button" data-filter="growth">Growth</button>
-          <button class="tag-button" type="button" data-filter="reading">Reading</button>
-          <button class="tag-button" type="button" data-filter="life">Life</button>
-        </div>
-        <ul class="note-list">
-          <li data-tag="growth">
-            <time datetime="2026-05-18">2026.05.18</time>
-            <a href="#">把长期目标拆成可以被今天完成的一小块</a>
-          </li>
-          <li data-tag="reading">
-            <time datetime="2026-04-30">2026.04.30</time>
-            <a href="#">摘录不是复制句子，而是重建自己的问题意识</a>
-          </li>
-          <li data-tag="life">
-            <time datetime="2026-03-29">2026.03.29</time>
-            <a href="#">周末记录：保留一些不被效率衡量的时间</a>
-          </li>
-          <li data-tag="growth">
-            <time datetime="2026-02-14">2026.02.14</time>
-            <a href="#">复盘时要区分事实、情绪和解释</a>
-          </li>
-        </ul>
-      </section>
-
-      <section class="section" id="frames" aria-labelledby="frames-title">
-        <div class="section-heading">
-          <p class="section-number">G.07</p>
-          <h2 id="frames-title">Frames</h2>
-        </div>
-        <div class="frames-grid">
-          <figure>
-            <img
-              src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=900&q=80"
-              alt="桌面上的笔记本与咖啡"
-            />
-            <figcaption>一张适合写作的桌面</figcaption>
-          </figure>
-          <figure>
-            <img
-              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
-              alt="安静的自然风景"
-            />
-            <figcaption>一些让人慢下来的地方</figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <section class="section hello-section" id="hello" aria-labelledby="hello-title">
-        <div class="section-heading">
-          <p class="section-number">H.08</p>
-          <h2 id="hello-title">Hello</h2>
-        </div>
-        <div class="hello-layout">
-          <p>
-            如果你也对这些问题感兴趣，可以通过下面的方式联系我。这里可以放邮箱、GitHub、公众号、B站、小红书或其他主页链接。
-          </p>
-          <div class="contact-links">
-            <a href="mailto:you@example.com">Email</a>
-            <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
-            <a href="#" aria-label="你的社交主页">Social</a>
+      <section class="panel panel-resources" id="resources" data-panel>
+        <div class="panel-shell">
+          <div class="panel-heading">
+            <p class="eyebrow">C.03 / RESOURCES</p>
+            <h1>资料存放</h1>
+            <p>整理公开资料、参考链接、阅读清单和后续写作素材。</p>
           </div>
+
+          <ul class="resource-list">
+            <li>
+              <span>READING</span>
+              <a href="#">阅读清单与书摘整理</a>
+            </li>
+            <li>
+              <span>LINKS</span>
+              <a href="#">常用网站、工具与参考链接</a>
+            </li>
+            <li>
+              <span>NOTES</span>
+              <a href="#">学习资料、课程笔记和阶段总结</a>
+            </li>
+            <li>
+              <span>ARCHIVE</span>
+              <a href="#">旧文章、旧想法和待整理素材</a>
+            </li>
+          </ul>
         </div>
       </section>
     </main>
-
-    <footer class="site-footer">
-      <span>© 2026 你的名字</span>
-      <a href="#top">Back to top</a>
-    </footer>
 
     <script src="script.js"></script>
   </body>

@@ -1,19 +1,25 @@
-const filterButtons = document.querySelectorAll("[data-filter]");
-const noteItems = document.querySelectorAll(".note-list li");
+const panels = document.querySelectorAll("[data-panel]");
+const navLinks = document.querySelectorAll(".nav-links a");
+const validPanels = new Set([...panels].map((panel) => panel.id));
 
-filterButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const filter = button.dataset.filter;
+function activatePanel(panelId) {
+  const nextPanel = validPanels.has(panelId) ? panelId : "schedule";
 
-    filterButtons.forEach((item) => item.classList.remove("is-active"));
-    button.classList.add("is-active");
-
-    noteItems.forEach((item) => {
-      const shouldShow = filter === "all" || item.dataset.tag === filter;
-      item.classList.toggle("is-hidden", !shouldShow);
-    });
+  panels.forEach((panel) => {
+    panel.classList.toggle("is-active", panel.id === nextPanel);
   });
+
+  navLinks.forEach((link) => {
+    const linkPanel = link.getAttribute("href").replace("#", "");
+    link.classList.toggle("is-active", linkPanel === nextPanel);
+  });
+}
+
+window.addEventListener("hashchange", () => {
+  activatePanel(window.location.hash.slice(1));
 });
+
+activatePanel(window.location.hash.slice(1));
 
 const calendarRoot = document.querySelector("[data-calendar]");
 
