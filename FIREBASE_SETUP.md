@@ -1,6 +1,6 @@
 # Firebase 云端同步配置
 
-代码已经支持 Firebase 云端同步。当前 `firebase-config.js` 还是空配置，所以网站会继续使用本地模式。
+代码已经支持 Firebase 云端同步。`firebase-config.js` 填好后，日程会保存到你的用户数据下，整站内容会保存到公共网站内容文档中。
 
 ## 1. 创建 Firebase 项目
 
@@ -41,6 +41,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /siteContent/{documentId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == "PASTE_YOUR_UID_HERE";
+    }
+
     match /users/{userId}/schedules/{dateId} {
       allow read, write: if request.auth != null
         && request.auth.uid == "PASTE_YOUR_UID_HERE"
@@ -50,4 +56,4 @@ service cloud.firestore {
 }
 ```
 
-这样只有你的 Google 账号能读写日程。
+这样所有访问者都能看到你发布的整站内容，只有你的 Google 账号能更新整站内容和读写日程。

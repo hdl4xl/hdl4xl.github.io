@@ -5,102 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>hdl4xl LAB</title>
     <meta name="description" content="hdl4xl 的个人日程、构思与资料存放空间。" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header" aria-label="主导航">
-      <a class="brand" href="#welcome" aria-label="hdl4xl LAB 首页">hdl4xl LAB</a>
-      <nav class="nav-links" aria-label="页面导航">
-        <a href="#schedule">
-          <span>SCHEDULE</span>
-          <small>日程安排</small>
-        </a>
-        <a href="#ideas">
-          <span>IDEAS</span>
-          <small>构思</small>
-        </a>
-        <a href="#resources">
-          <span>RESOURCES</span>
-          <small>资料存放</small>
-        </a>
-      </nav>
+      <a class="brand" href="#welcome" aria-label="hdl4xl LAB 首页" data-site-field="brand">hdl4xl LAB</a>
+      <div class="header-actions">
+        <nav class="nav-links" aria-label="页面导航">
+          <a href="#schedule">
+            <span data-site-field="nav.scheduleLabel">SCHEDULE</span>
+            <small data-site-field="nav.scheduleSub">日程安排</small>
+          </a>
+          <a href="#ideas">
+            <span data-site-field="nav.ideasLabel">IDEAS</span>
+            <small data-site-field="nav.ideasSub">构思</small>
+          </a>
+          <a href="#resources">
+            <span data-site-field="nav.resourcesLabel">RESOURCES</span>
+            <small data-site-field="nav.resourcesSub">资料存放</small>
+          </a>
+          <button class="nav-login" type="button" data-sync-login>
+            <span data-sync-login-label>LOGIN</span>
+            <small data-sync-status>登录</small>
+          </button>
+        </nav>
+        <code class="sync-user-id" data-sync-user-id hidden></code>
+      </div>
     </header>
+
+    <aside class="site-editor" data-site-editor hidden aria-label="网站内容编辑">
+      <div class="site-editor-header">
+        <div>
+          <p class="eyebrow">Site Editor</p>
+          <h2>网站更新</h2>
+        </div>
+        <button class="ghost-button" type="button" data-site-editor-close>关闭</button>
+      </div>
+      <form class="site-editor-form" data-site-editor-form>
+        <div class="site-editor-fields" data-site-editor-fields></div>
+        <div class="site-editor-footer">
+          <button class="primary-button" type="submit">保存整站</button>
+          <p class="save-status" data-site-editor-status aria-live="polite"></p>
+        </div>
+      </form>
+    </aside>
 
     <main class="lab-stage">
       <section class="panel panel-cover" id="welcome" data-panel>
         <div class="cover-shell">
-          <p class="eyebrow">hdl4xl LAB / HOME</p>
-          <h1>Welcome To My Space</h1>
-          <p>一个用来记录日程、构思和资料的个人空间。</p>
-          <a class="cover-link" href="#schedule">ENTER</a>
+          <p class="eyebrow" data-site-field="home.eyebrow">hdl4xl LAB / HOME</p>
+          <h1 data-site-field="home.title">Welcome To My Space</h1>
+          <a class="cover-link" href="#schedule" data-site-field="home.cta">ENTER</a>
         </div>
       </section>
 
       <section class="panel panel-schedule is-active" id="schedule" data-panel>
         <div class="panel-shell">
           <div class="panel-heading">
-            <p class="eyebrow">A.01 / SCHEDULE</p>
-            <h1>日程安排</h1>
-            <p>点击日历中的某一天，编辑并保存当天要做的事情。</p>
+            <p class="eyebrow" data-site-field="schedule.eyebrow">A.01 / SCHEDULE</p>
+            <h1 data-site-field="schedule.title">日程安排</h1>
+            <p data-site-field="schedule.description">点击日历中的某一天，编辑并保存当天要做的事情。</p>
+          </div>
+
+          <div class="schedule-switcher" aria-label="日程视图">
+            <button class="schedule-tab is-active" type="button" data-schedule-view="day">日</button>
+            <button class="schedule-tab" type="button" data-schedule-view="month">月</button>
+            <button class="schedule-tab" type="button" data-schedule-view="year">年</button>
           </div>
 
           <div class="calendar-app" data-calendar>
-            <div class="calendar-toolbar">
-              <div>
-                <p class="eyebrow">Calendar</p>
-                <h2 data-calendar-month>2026年5月</h2>
-              </div>
-              <div class="calendar-actions" aria-label="切换月份">
-                <button class="ghost-button" type="button" data-calendar-prev>上个月</button>
-                <button class="ghost-button" type="button" data-calendar-today>今天</button>
-                <button class="ghost-button" type="button" data-calendar-next>下个月</button>
-              </div>
-            </div>
-
-            <div class="calendar-layout">
-              <div class="calendar-main">
-                <div class="weekday-row" aria-hidden="true">
-                  <span>日</span>
-                  <span>一</span>
-                  <span>二</span>
-                  <span>三</span>
-                  <span>四</span>
-                  <span>五</span>
-                  <span>六</span>
+            <section class="calendar-view" data-schedule-panel="day" aria-label="日历">
+              <div class="calendar-toolbar">
+                <div>
+                  <p class="eyebrow">Calendar</p>
+                  <h2 data-calendar-month>2026年5月</h2>
                 </div>
-                <div class="calendar-grid" data-calendar-grid aria-label="可编辑日历"></div>
+                <div class="calendar-actions" aria-label="切换月份">
+                  <button class="ghost-button" type="button" data-calendar-prev>上个月</button>
+                  <button class="ghost-button" type="button" data-calendar-today>今天</button>
+                  <button class="ghost-button" type="button" data-calendar-next>下个月</button>
+                </div>
               </div>
 
-              <aside class="calendar-editor" aria-label="编辑日程">
-                <p class="eyebrow">Selected Day</p>
-                <h2 data-selected-date>请选择日期</h2>
-                <div class="sync-panel" data-sync-panel>
-                  <p data-sync-status>本地模式</p>
-                  <button class="ghost-button" type="button" data-sync-login>登录同步</button>
-                  <button class="ghost-button" type="button" data-sync-logout hidden>退出登录</button>
-                  <code data-sync-user-id hidden></code>
+              <div class="calendar-layout">
+                <div class="calendar-main">
+                  <div class="weekday-row" aria-hidden="true">
+                    <span>日</span>
+                    <span>一</span>
+                    <span>二</span>
+                    <span>三</span>
+                    <span>四</span>
+                    <span>五</span>
+                    <span>六</span>
+                  </div>
+                  <div class="calendar-grid" data-calendar-grid aria-label="可编辑日历"></div>
                 </div>
-                <label for="schedule-input">当天日程</label>
-                <textarea
-                  id="schedule-input"
-                  data-schedule-input
-                  rows="8"
-                  placeholder="例如：上午整理资料&#10;下午写一段个人感悟"
-                ></textarea>
-                <div class="editor-actions">
-                  <button class="primary-button" type="button" data-save-schedule>保存</button>
-                  <button class="ghost-button" type="button" data-clear-schedule>清空</button>
+
+                <aside class="calendar-editor" aria-label="编辑日程">
+                  <p class="eyebrow">Selected Day</p>
+                  <h2 data-selected-date>请选择日期</h2>
+                  <div class="day-plan-header">
+                    <label>当天计划</label>
+                    <button class="ghost-button" type="button" data-add-schedule-item>新增计划</button>
+                  </div>
+                  <div class="schedule-items" data-schedule-items></div>
+                  <div class="editor-actions">
+                    <button class="primary-button" type="button" data-save-schedule>保存</button>
+                    <button class="ghost-button" type="button" data-clear-schedule>清空</button>
+                  </div>
+                  <p class="hint">每条计划都是一个独立色块，可单独新增或删除。</p>
+                  <p class="save-status" data-save-status aria-live="polite"></p>
+                </aside>
+              </div>
+            </section>
+
+            <section class="monthly-plan" data-schedule-panel="month" data-monthly-plan aria-label="月度计划甘特图" hidden>
+              <div class="plan-header">
+                <div>
+                  <p class="eyebrow">Monthly Plan</p>
+                  <h2 data-plan-month>2026年5月计划</h2>
                 </div>
-                <p class="hint">保存后会显示在对应日期下面，并保存在当前浏览器中。</p>
-                <p class="save-status" data-save-status aria-live="polite"></p>
-              </aside>
-            </div>
+                <div class="plan-actions">
+                  <button class="ghost-button" type="button" data-plan-prev>上个月</button>
+                  <button class="ghost-button" type="button" data-plan-current>本月</button>
+                  <button class="ghost-button" type="button" data-plan-next>下个月</button>
+                  <button class="ghost-button" type="button" data-plan-add>新增计划</button>
+                  <button class="primary-button" type="button" data-plan-save>保存计划</button>
+                </div>
+              </div>
+
+              <div class="gantt-board">
+                <div class="gantt-scale" data-gantt-scale aria-hidden="true"></div>
+                <div class="gantt-rows" data-gantt-rows></div>
+              </div>
+              <p class="hint">计划表会随整站内容保存，登录后可同步到云端。</p>
+            </section>
+
+            <section class="yearly-plan" data-schedule-panel="year" data-yearly-plan aria-label="年度计划" hidden>
+              <div class="plan-header">
+                <div>
+                  <p class="eyebrow">Annual Plan</p>
+                  <h2 data-year-plan-title>2026年年度计划</h2>
+                </div>
+                <div class="plan-actions">
+                  <button class="ghost-button" type="button" data-year-prev>上一年</button>
+                  <button class="ghost-button" type="button" data-year-current>今年</button>
+                  <button class="ghost-button" type="button" data-year-next>下一年</button>
+                  <button class="ghost-button" type="button" data-year-add>新增年度计划</button>
+                  <button class="primary-button" type="button" data-year-save>保存年度计划</button>
+                </div>
+              </div>
+
+              <div class="year-board">
+                <div class="year-rows" data-year-rows></div>
+              </div>
+              <p class="hint">年度计划按一行一条记录，适合写跨月目标。</p>
+            </section>
           </div>
         </div>
       </section>
@@ -108,12 +168,17 @@
       <section class="panel panel-ideas" id="ideas" data-panel>
         <div class="panel-shell">
           <div class="panel-heading">
-            <p class="eyebrow">B.02 / IDEAS</p>
-            <h1>构思</h1>
-            <p>把尚未成文的想法先保存下来，之后再慢慢展开。</p>
+            <p class="eyebrow" data-site-field="ideas.eyebrow">B.02 / IDEAS</p>
+            <h1 data-site-field="ideas.title">构思</h1>
+            <p data-site-field="ideas.description">把尚未成文的想法先保存下来，之后再慢慢展开。</p>
           </div>
 
-          <div class="idea-grid">
+          <div class="section-tools" aria-label="构思操作">
+            <button class="primary-button" type="button" data-idea-add>新增构思</button>
+            <button class="ghost-button" type="button" data-idea-save>保存构思</button>
+            <p class="save-status" data-idea-status aria-live="polite"></p>
+          </div>
+          <div class="idea-grid" data-idea-grid>
             <article>
               <span>IDEA 01</span>
               <h2>如何把零散想法整理成文章</h2>
@@ -136,12 +201,17 @@
       <section class="panel panel-resources" id="resources" data-panel>
         <div class="panel-shell">
           <div class="panel-heading">
-            <p class="eyebrow">C.03 / RESOURCES</p>
-            <h1>资料存放</h1>
-            <p>整理公开资料、参考链接、阅读清单和后续写作素材。</p>
+            <p class="eyebrow" data-site-field="resources.eyebrow">C.03 / RESOURCES</p>
+            <h1 data-site-field="resources.title">资料存放</h1>
+            <p data-site-field="resources.description">整理公开资料、参考链接、阅读清单和后续写作素材。</p>
           </div>
 
-          <ul class="resource-list">
+          <div class="section-tools" aria-label="资料操作">
+            <button class="primary-button" type="button" data-resource-add>新增资料</button>
+            <button class="ghost-button" type="button" data-resource-save>保存资料</button>
+            <p class="save-status" data-resource-status aria-live="polite"></p>
+          </div>
+          <ul class="resource-list" data-resource-list>
             <li>
               <span>READING</span>
               <a href="#">阅读清单与书摘整理</a>
