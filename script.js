@@ -130,6 +130,7 @@ if (calendarRoot) {
   const siteEditorForm = document.querySelector("[data-site-editor-form]");
   const siteEditorFields = document.querySelector("[data-site-editor-fields]");
   const siteEditorStatus = document.querySelector("[data-site-editor-status]");
+  const editorSyncState = document.querySelector("[data-editor-sync-state]");
   const ideaAdd = document.querySelector("[data-idea-add]");
   const ideaSave = document.querySelector("[data-idea-save]");
   const ideaStatus = document.querySelector("[data-idea-status]");
@@ -279,7 +280,7 @@ if (calendarRoot) {
         console.error(error);
       }
     } else {
-      showStatus("月度计划已保存到当前浏览器。");
+      showStatus(localOnlyMessage("月度计划已保存"));
     }
   });
 
@@ -332,7 +333,7 @@ if (calendarRoot) {
         console.error(error);
       }
     } else {
-      showStatus("年度计划已保存到当前浏览器。");
+      showStatus(localOnlyMessage("年度计划已保存"));
     }
   });
 
@@ -367,7 +368,7 @@ if (calendarRoot) {
         console.error(error);
       }
     } else {
-      showStatus("已保存到当前浏览器。");
+      showStatus(localOnlyMessage("已保存"));
     }
   });
 
@@ -425,7 +426,7 @@ if (calendarRoot) {
 
   syncLogin.addEventListener("click", async () => {
     if (!cloud.configured) {
-      showStatus("请先填写 Firebase 配置。");
+      showGlobalStatus("请先填写 Firebase 配置。");
       return;
     }
 
@@ -437,7 +438,7 @@ if (calendarRoot) {
 
       await signInToCloud();
     } catch (error) {
-      showStatus("登录失败，请检查 Firebase 配置。");
+      showGlobalStatus(getAuthErrorMessage(error));
       console.error(error);
     }
   });
@@ -536,6 +537,7 @@ if (calendarRoot) {
   if (siteEditorOpen) {
     siteEditorOpen.addEventListener("click", () => {
       renderSiteEditor();
+      updateEditorSyncState();
       siteEditor.hidden = false;
     });
   }
@@ -568,7 +570,7 @@ if (calendarRoot) {
           console.error(error);
         }
       } else {
-        showEditorStatus("整站内容已保存到当前浏览器。");
+        showEditorStatus(localOnlyMessage("整站内容已保存"));
       }
     });
   }
@@ -801,7 +803,7 @@ if (calendarRoot) {
       return;
     }
 
-    showSectionStatus(statusElement, localMessage);
+    showSectionStatus(statusElement, localOnlyMessage(localMessage.replace(/。$/, "")));
   }
 
   function showSectionStatus(statusElement, message) {
@@ -1305,6 +1307,13 @@ if (calendarRoot) {
       cloud.api = { ...authApi, ...firestoreApi };
 
       try {
+        await cloud.api.getRedirectResult(cloud.auth);
+      } catch (error) {
+        setSyncState("error");
+        console.error(error);
+      }
+
+      try {
         await loadCloudSiteContent();
       } catch (error) {
         cloud.siteContentError = error;
@@ -1343,7 +1352,23 @@ if (calendarRoot) {
 
   async function signInToCloud() {
     const provider = new cloud.api.GoogleAuthProvider();
-    await cloud.api.signInWithPopup(cloud.auth, provider);
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    if (prefersRedirectAuth()) {
+      await cloud.api.signInWithRedirect(cloud.auth, provider);
+      return;
+    }
+
+    try {
+      await cloud.api.signInWithPopup(cloud.auth, provider);
+    } catch (error) {
+      if (shouldRetryWithRedirect(error)) {
+        await cloud.api.signInWithRedirect(cloud.auth, provider);
+        return;
+      }
+
+      throw error;
+    }
   }
 
   async function loadCloudSiteContent() {
@@ -1422,15 +1447,18 @@ if (calendarRoot) {
     syncLogin.disabled = false;
     syncLoginLabel.textContent = "LOGIN";
     syncStatus.textContent = "登录";
+    updateEditorSyncState("请先登录，保存后才会同步线上网页。");
 
     if (state === "local") {
       syncStatus.textContent = "本地模式";
       syncLogin.disabled = true;
+      updateEditorSyncState("当前是本地模式：内容只能保存在本机，不能同步线上网页。");
       return;
     }
 
     if (state === "signed-out") {
       syncStatus.textContent = "登录";
+      updateEditorSyncState("未登录：保存只在本机生效，不会更新线上网页。");
       return;
     }
 
@@ -1438,6 +1466,7 @@ if (calendarRoot) {
       syncStatus.textContent = "同步中";
       syncLogin.disabled = true;
       showCurrentUid();
+      updateEditorSyncState("正在同步云端内容。");
       return;
     }
 
@@ -1445,10 +1474,12 @@ if (calendarRoot) {
       syncLoginLabel.textContent = "LOGOUT";
       syncStatus.textContent = cloud.user.email || "已登录";
       showCurrentUid();
+      updateEditorSyncState(`已登录：保存后会同步线上网页。UID: ${cloud.user.uid}`);
       return;
     }
 
     syncStatus.textContent = "连接异常";
+    updateEditorSyncState("连接异常：保存可能只在本机生效，请检查登录和 Firebase 规则。");
     if (cloud.user) {
       syncLoginLabel.textContent = "LOGOUT";
       showCurrentUid();
@@ -1462,6 +1493,55 @@ if (calendarRoot) {
 
     syncUserId.hidden = false;
     syncUserId.textContent = `UID: ${cloud.user.uid}`;
+  }
+
+  function updateEditorSyncState(message) {
+    if (!editorSyncState) {
+      return;
+    }
+
+    if (message) {
+      editorSyncState.textContent = message;
+      return;
+    }
+
+    editorSyncState.textContent = cloud.ready
+      ? `已登录：保存后会同步线上网页。UID: ${cloud.user.uid}`
+      : "未登录：保存只在本机生效，不会更新线上网页。";
+  }
+
+  function showGlobalStatus(message) {
+    syncStatus.textContent = message;
+
+    if (siteEditor && !siteEditor.hidden) {
+      showEditorStatus(message);
+      return;
+    }
+
+    showStatus(message);
+  }
+
+  function localOnlyMessage(action) {
+    return `${action}；未登录，只保存在本机，线上网页不会更新。`;
+  }
+
+  function prefersRedirectAuth() {
+    return (
+      window.matchMedia("(max-width: 768px)").matches ||
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+    );
+  }
+
+  function shouldRetryWithRedirect(error) {
+    return ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(error?.code);
+  }
+
+  function getAuthErrorMessage(error) {
+    if (error?.code === "auth/unauthorized-domain") {
+      return "登录失败：请在 Firebase Authentication 里把 hdl4xl.github.io 加入授权域名。";
+    }
+
+    return "登录失败，请检查 Firebase 配置或浏览器弹窗限制。";
   }
 
   function hasFirebaseConfig() {
