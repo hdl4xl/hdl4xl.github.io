@@ -25,8 +25,8 @@
             <small data-site-field="nav.resourcesSub">资料存放</small>
           </a>
           <button class="nav-login" type="button" data-sync-login>
-            <span data-sync-login-label>LOGIN</span>
-            <small data-sync-status>登录</small>
+            <span data-sync-login-label>SYNC</span>
+            <small data-sync-status>公共同步</small>
           </button>
           <button class="nav-login nav-update" type="button" data-site-editor-open>
             <span>EDIT</span>
@@ -42,8 +42,8 @@
         <div>
           <p class="eyebrow">Site Editor</p>
           <h2>网站编辑</h2>
-          <p class="editor-purpose">EDIT 用来编辑页面文字、日程、构思和资料；保存后同步云端，不是重新部署代码。</p>
-          <p class="editor-sync-state" data-editor-sync-state>请先登录，保存后才会同步线上网页。</p>
+          <p class="editor-purpose">EDIT 用来编辑页面文字、日程、构思和资料；保存后所有访问者都能看到。</p>
+          <p class="editor-sync-state" data-editor-sync-state>正在连接公共云端。</p>
         </div>
         <button class="ghost-button" type="button" data-site-editor-close>关闭</button>
       </div>
@@ -145,7 +145,7 @@
                 <div class="gantt-scale" data-gantt-scale aria-hidden="true"></div>
                 <div class="gantt-rows" data-gantt-rows></div>
               </div>
-              <p class="hint">计划表会随整站内容保存，登录后可同步到云端。</p>
+              <p class="hint">计划表会随整站内容保存到公共云端。</p>
             </section>
 
             <section class="yearly-plan" data-schedule-panel="year" data-yearly-plan aria-label="年度计划" hidden>

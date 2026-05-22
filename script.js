@@ -187,9 +187,7 @@ if (calendarRoot) {
   let monthlyPlans = loadMonthlyPlans();
   let yearlyPlans = loadYearlyPlans();
   let cloud = {
-    auth: null,
     db: null,
-    user: null,
     ready: false,
     configured: hasFirebaseConfig(),
     api: null,
@@ -432,15 +430,16 @@ if (calendarRoot) {
       return;
     }
 
-    try {
-      if (cloud.user && cloud.auth) {
-        await cloud.api.signOut(cloud.auth);
-        return;
-      }
+    if (!cloud.ready) {
+      showGlobalStatus("公共云端还未连接，请稍后重试。");
+      return;
+    }
 
-      await signInToCloud();
+    try {
+      await refreshCloudContent({ forceServer: true });
+      showGlobalStatus("已刷新公共云端内容。");
     } catch (error) {
-      showGlobalStatus(getAuthErrorMessage(error));
+      showGlobalStatus(getCloudErrorMessage(error));
       console.error(error);
     }
   });
@@ -588,7 +587,7 @@ if (calendarRoot) {
         await refreshCloudContent({ forceServer: true });
         showEditorStatus("已从云端刷新最新内容。");
       } catch (error) {
-        showEditorStatus("云端刷新失败，请确认已登录和网络正常。");
+        showEditorStatus("云端刷新失败，请确认公共读写规则和网络正常。");
         console.error(error);
       }
     });
@@ -1314,83 +1313,26 @@ if (calendarRoot) {
     }
 
     try {
-      const [{ initializeApp }, authApi, firestoreApi] = await Promise.all([
+      setSyncState("loading");
+
+      const [{ initializeApp }, firestoreApi] = await Promise.all([
         import(`https://www.gstatic.com/firebasejs/${firebaseVersion}/firebase-app.js`),
-        import(`https://www.gstatic.com/firebasejs/${firebaseVersion}/firebase-auth.js`),
         import(`https://www.gstatic.com/firebasejs/${firebaseVersion}/firebase-firestore.js`),
       ]);
 
       const app = initializeApp(window.FIREBASE_CONFIG);
-      cloud.auth = authApi.getAuth(app);
       cloud.db = firestoreApi.getFirestore(app);
-      cloud.api = { ...authApi, ...firestoreApi };
+      cloud.api = { ...firestoreApi };
+      cloud.ready = true;
 
-      await cloud.api.setPersistence(cloud.auth, cloud.api.browserLocalPersistence);
-
-      try {
-        await cloud.api.getRedirectResult(cloud.auth);
-      } catch (error) {
-        cloud.lastError = error;
-        setSyncState("error");
-        console.error(error);
-      }
-
-      try {
-        await loadCloudSiteContent({ forceServer: true });
-      } catch (error) {
-        cloud.siteContentError = error;
-        cloud.lastError = error;
-      }
-
-      cloud.api.onAuthStateChanged(cloud.auth, async (user) => {
-        cloud.user = user;
-        cloud.ready = Boolean(user);
-
-        if (!user) {
-          setSyncState("signed-out");
-          return;
-        }
-
-        setSyncState("loading");
-
-        try {
-          await refreshCloudContent({ forceServer: true });
-        } catch (error) {
-          cloud.siteContentError = error;
-          cloud.lastError = error;
-          setSyncState("error");
-          console.error(error);
-          return;
-        }
-
-        cloud.lastError = null;
-        setSyncState("synced");
-      });
+      await refreshCloudContent({ forceServer: true });
+      cloud.lastError = null;
+      setSyncState("public");
     } catch (error) {
+      cloud.ready = false;
       cloud.lastError = error;
       setSyncState("error");
       console.error(error);
-    }
-  }
-
-  async function signInToCloud() {
-    const provider = new cloud.api.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-
-    if (prefersRedirectAuth()) {
-      await cloud.api.signInWithRedirect(cloud.auth, provider);
-      return;
-    }
-
-    try {
-      await cloud.api.signInWithPopup(cloud.auth, provider);
-    } catch (error) {
-      if (shouldRetryWithRedirect(error)) {
-        await cloud.api.signInWithRedirect(cloud.auth, provider);
-        return;
-      }
-
-      throw error;
     }
   }
 
@@ -1438,7 +1380,7 @@ if (calendarRoot) {
 
   async function loadCloudSchedules(options = {}) {
     const { collection, getDocs, getDocsFromServer } = cloud.api;
-    const schedulesRef = collection(cloud.db, "users", cloud.user.uid, "schedules");
+    const schedulesRef = collection(cloud.db, "publicSchedules");
     const snapshot = options.forceServer && getDocsFromServer ? await getDocsFromServer(schedulesRef) : await getDocs(schedulesRef);
     const cloudSchedules = {};
 
@@ -1459,7 +1401,7 @@ if (calendarRoot) {
 
   async function saveCloudSchedule(dateKey, items) {
     const { deleteDoc, doc, serverTimestamp, setDoc } = cloud.api;
-    const documentRef = doc(cloud.db, "users", cloud.user.uid, "schedules", dateKey);
+    const documentRef = doc(cloud.db, "publicSchedules", dateKey);
     const normalizedItems = normalizeScheduleItems(items);
 
     if (!normalizedItems.length) {
@@ -1480,54 +1422,37 @@ if (calendarRoot) {
     syncUserId.hidden = true;
     syncUserId.textContent = "";
     syncLogin.disabled = false;
-    syncLoginLabel.textContent = "LOGIN";
-    syncStatus.textContent = "登录";
-    updateEditorSyncState("请先登录，保存后才会同步线上网页。");
+    syncLoginLabel.textContent = "SYNC";
+    syncStatus.textContent = "公共同步";
+    updateEditorSyncState("正在连接公共云端。");
 
     if (state === "local") {
       syncStatus.textContent = "本地模式";
       syncLogin.disabled = true;
-      updateEditorSyncState("当前是本地模式：内容只能保存在本机，不能同步线上网页。");
-      return;
-    }
-
-    if (state === "signed-out") {
-      syncStatus.textContent = "登录";
-      updateEditorSyncState("未登录：保存只在本机生效，不会更新线上网页。");
+      updateEditorSyncState("当前是本地模式：内容只能保存在本机，不能同步给其他人。");
       return;
     }
 
     if (state === "loading") {
       syncStatus.textContent = "同步中";
       syncLogin.disabled = true;
-      showCurrentUid();
-      updateEditorSyncState("正在同步云端内容。");
+      updateEditorSyncState("正在同步公共云端内容。");
       return;
     }
 
-    if (state === "synced") {
-      syncLoginLabel.textContent = "LOGOUT";
-      syncStatus.textContent = cloud.user.email || "已登录";
-      showCurrentUid();
-      updateEditorSyncState(`已保持登录：保存会同步线上网页。UID: ${cloud.user.uid}`);
+    if (state === "public") {
+      syncStatus.textContent = "公共在线";
+      updateEditorSyncState("公共同步已开启：任何人保存后，所有访问者都能看到。");
       return;
     }
 
     syncStatus.textContent = "连接异常";
-    if (cloud.user) {
-      syncLoginLabel.textContent = "LOGOUT";
-      showCurrentUid();
-    }
     updateEditorSyncState(getCloudErrorMessage(cloud.lastError));
   }
 
   function showCurrentUid() {
-    if (!cloud.user) {
-      return;
-    }
-
     syncUserId.hidden = false;
-    syncUserId.textContent = `UID: ${cloud.user.uid}`;
+    syncUserId.textContent = "Public cloud mode";
   }
 
   function updateEditorSyncState(message) {
@@ -1541,8 +1466,8 @@ if (calendarRoot) {
     }
 
     editorSyncState.textContent = cloud.ready
-      ? `已保持登录：保存会同步线上网页。UID: ${cloud.user.uid}`
-      : "未登录：保存只在本机生效，不会更新线上网页。";
+      ? "公共同步已开启：任何人保存后，所有访问者都能看到。"
+      : "公共云端未连接：保存只在本机生效。";
   }
 
   function showGlobalStatus(message) {
@@ -1557,44 +1482,23 @@ if (calendarRoot) {
   }
 
   function localOnlyMessage(action) {
-    return `${action}；未登录，只保存在本机，线上网页不会更新。`;
+    return `${action}；公共云端未连接，只保存在本机，其他人暂时看不到。`;
   }
 
   function getCloudErrorMessage(error) {
-    const uidText = cloud.user?.uid ? `当前登录 UID: ${cloud.user.uid}` : "当前还没有拿到登录 UID";
-
     if (error?.code === "permission-denied") {
-      return `云端权限不足：请把 Firebase Firestore 规则里的 PASTE_YOUR_UID_HERE 全部替换为你的 UID。${uidText}`;
+      return "公共云端权限不足：请把 Firebase Firestore 规则改成允许 siteContent 和 publicSchedules 公共读写。";
     }
 
     if (error?.code === "unavailable") {
-      return `云端连接失败：请检查手机网络或稍后重试。${uidText}`;
+      return "公共云端连接失败：请检查网络或稍后重试。";
     }
 
     if (error?.code === "failed-precondition") {
-      return `Firestore 数据库未就绪或规则配置不完整。${uidText}`;
+      return "Firestore 数据库未就绪或规则配置不完整。";
     }
 
-    return `连接异常：保存可能只在本机生效，请检查 Firebase 规则。${uidText}`;
-  }
-
-  function prefersRedirectAuth() {
-    return (
-      window.matchMedia("(max-width: 768px)").matches ||
-      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-    );
-  }
-
-  function shouldRetryWithRedirect(error) {
-    return ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(error?.code);
-  }
-
-  function getAuthErrorMessage(error) {
-    if (error?.code === "auth/unauthorized-domain") {
-      return "登录失败：请在 Firebase Authentication 里把 hdl4xl.github.io 加入授权域名。";
-    }
-
-    return "登录失败，请检查 Firebase 配置或浏览器弹窗限制。";
+    return "连接异常：保存可能只在本机生效，请检查 Firebase 公共读写规则。";
   }
 
   function hasFirebaseConfig() {

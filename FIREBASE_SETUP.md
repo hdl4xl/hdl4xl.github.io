@@ -1,6 +1,6 @@
 # Firebase 云端同步配置
 
-代码已经支持 Firebase 云端同步。`firebase-config.js` 填好后，日程会保存到你的用户数据下，整站内容会保存到公共网站内容文档中。
+代码已经支持 Firebase 公共云端同步。`firebase-config.js` 填好后，整站内容会保存到 `siteContent/main`，日程会保存到 `publicSchedules`，所有访问者都可以读取和修改。
 
 ## 1. 创建 Firebase 项目
 
@@ -17,13 +17,11 @@
 4. 复制 Firebase config
 5. 把 `firebase-config.js` 中的空字符串替换成你的配置
 
-## 3. 开启登录
+## 3. 公共同步模式
 
-1. 左侧进入 Authentication
-2. Get started
-3. Sign-in method
-4. 启用 Google
-5. Authorized domains 中确保有 `hdl4xl.github.io`
+当前网站不需要登录。任何访问者都可以修改内容，并且其他访问者刷新云端后能看到同一份内容。
+
+注意：这也意味着任何人都可以误删、乱改或覆盖内容。这个模式适合公开协作或临时共享，不适合保存不能被他人修改的重要内容。
 
 ## 4. 开启 Firestore
 
@@ -34,7 +32,7 @@
 
 ## 5. 配置安全规则
 
-第一次登录网站后，页面会显示你的 UID。把下面规则里的 `PASTE_YOUR_UID_HERE` 换成你的 UID：
+公共协作模式需要允许匿名读写这两个位置：
 
 ```txt
 rules_version = '2';
@@ -42,18 +40,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /siteContent/{documentId} {
-      allow read: if true;
-      allow write: if request.auth != null
-        && request.auth.uid == "PASTE_YOUR_UID_HERE";
+      allow read, write: if true;
     }
 
-    match /users/{userId}/schedules/{dateId} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == "PASTE_YOUR_UID_HERE"
-        && userId == "PASTE_YOUR_UID_HERE";
+    match /publicSchedules/{dateId} {
+      allow read, write: if true;
     }
   }
 }
 ```
 
-这样所有访问者都能看到你发布的整站内容，只有你的 Google 账号能更新整站内容和读写日程。
+这样所有访问者都能看到并修改整站内容和日程。
