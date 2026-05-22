@@ -213,12 +213,17 @@ textarea {
   transform: none;
 }
 
+.editor-purpose,
 .editor-sync-state {
   max-width: 280px;
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.editor-purpose {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .sync-user-id {

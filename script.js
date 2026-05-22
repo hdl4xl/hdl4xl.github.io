@@ -131,6 +131,7 @@ if (calendarRoot) {
   const siteEditorFields = document.querySelector("[data-site-editor-fields]");
   const siteEditorStatus = document.querySelector("[data-site-editor-status]");
   const editorSyncState = document.querySelector("[data-editor-sync-state]");
+  const cloudRefresh = document.querySelector("[data-cloud-refresh]");
   const ideaAdd = document.querySelector("[data-idea-add]");
   const ideaSave = document.querySelector("[data-idea-save]");
   const ideaStatus = document.querySelector("[data-idea-status]");
@@ -571,6 +572,23 @@ if (calendarRoot) {
         }
       } else {
         showEditorStatus(localOnlyMessage("整站内容已保存"));
+      }
+    });
+  }
+
+  if (cloudRefresh) {
+    cloudRefresh.addEventListener("click", async () => {
+      if (!cloud.configured) {
+        showEditorStatus("Firebase 未配置，无法刷新云端。");
+        return;
+      }
+
+      try {
+        await refreshCloudContent({ forceServer: true });
+        showEditorStatus("已从云端刷新最新内容。");
+      } catch (error) {
+        showEditorStatus("云端刷新失败，请确认已登录和网络正常。");
+        console.error(error);
       }
     });
   }
@@ -1306,6 +1324,8 @@ if (calendarRoot) {
       cloud.db = firestoreApi.getFirestore(app);
       cloud.api = { ...authApi, ...firestoreApi };
 
+      await cloud.api.setPersistence(cloud.auth, cloud.api.browserLocalPersistence);
+
       try {
         await cloud.api.getRedirectResult(cloud.auth);
       } catch (error) {
@@ -1314,7 +1334,7 @@ if (calendarRoot) {
       }
 
       try {
-        await loadCloudSiteContent();
+        await loadCloudSiteContent({ forceServer: true });
       } catch (error) {
         cloud.siteContentError = error;
       }
@@ -1331,18 +1351,15 @@ if (calendarRoot) {
         setSyncState("loading");
 
         try {
-          await loadCloudSiteContent();
-        } catch (error) {
-          cloud.siteContentError = error;
-        }
-
-        try {
-          await loadCloudSchedules();
-          setSyncState("synced");
+          await refreshCloudContent({ forceServer: true });
         } catch (error) {
           setSyncState("error");
+          cloud.siteContentError = error;
           console.error(error);
+          return;
         }
+
+        setSyncState("synced");
       });
     } catch (error) {
       setSyncState("error");
@@ -1371,9 +1388,20 @@ if (calendarRoot) {
     }
   }
 
-  async function loadCloudSiteContent() {
-    const { doc, getDoc } = cloud.api;
-    const snapshot = await getDoc(doc(cloud.db, "siteContent", "main"));
+  async function refreshCloudContent(options = {}) {
+    await loadCloudSiteContent(options);
+
+    if (cloud.ready) {
+      await loadCloudSchedules(options);
+    }
+
+    updateEditorSyncState();
+  }
+
+  async function loadCloudSiteContent(options = {}) {
+    const { doc, getDoc, getDocFromServer } = cloud.api;
+    const documentRef = doc(cloud.db, "siteContent", "main");
+    const snapshot = options.forceServer && getDocFromServer ? await getDocFromServer(documentRef) : await getDoc(documentRef);
 
     if (!snapshot.exists()) {
       return;
@@ -1402,9 +1430,10 @@ if (calendarRoot) {
     );
   }
 
-  async function loadCloudSchedules() {
-    const { collection, getDocs } = cloud.api;
-    const snapshot = await getDocs(collection(cloud.db, "users", cloud.user.uid, "schedules"));
+  async function loadCloudSchedules(options = {}) {
+    const { collection, getDocs, getDocsFromServer } = cloud.api;
+    const schedulesRef = collection(cloud.db, "users", cloud.user.uid, "schedules");
+    const snapshot = options.forceServer && getDocsFromServer ? await getDocsFromServer(schedulesRef) : await getDocs(schedulesRef);
     const cloudSchedules = {};
 
     snapshot.forEach((document) => {
@@ -1474,7 +1503,7 @@ if (calendarRoot) {
       syncLoginLabel.textContent = "LOGOUT";
       syncStatus.textContent = cloud.user.email || "已登录";
       showCurrentUid();
-      updateEditorSyncState(`已登录：保存后会同步线上网页。UID: ${cloud.user.uid}`);
+      updateEditorSyncState(`已保持登录：保存会同步线上网页。UID: ${cloud.user.uid}`);
       return;
     }
 
@@ -1506,7 +1535,7 @@ if (calendarRoot) {
     }
 
     editorSyncState.textContent = cloud.ready
-      ? `已登录：保存后会同步线上网页。UID: ${cloud.user.uid}`
+      ? `已保持登录：保存会同步线上网页。UID: ${cloud.user.uid}`
       : "未登录：保存只在本机生效，不会更新线上网页。";
   }
 

@@ -29,8 +29,8 @@
             <small data-sync-status>登录</small>
           </button>
           <button class="nav-login nav-update" type="button" data-site-editor-open>
-            <span>UPDATE</span>
-            <small>更新</small>
+            <span>EDIT</span>
+            <small>编辑</small>
           </button>
         </nav>
         <code class="sync-user-id" data-sync-user-id hidden></code>
@@ -41,7 +41,8 @@
       <div class="site-editor-header">
         <div>
           <p class="eyebrow">Site Editor</p>
-          <h2>网站更新</h2>
+          <h2>网站编辑</h2>
+          <p class="editor-purpose">EDIT 用来编辑页面文字、日程、构思和资料；保存后同步云端，不是重新部署代码。</p>
           <p class="editor-sync-state" data-editor-sync-state>请先登录，保存后才会同步线上网页。</p>
         </div>
         <button class="ghost-button" type="button" data-site-editor-close>关闭</button>
@@ -49,6 +50,7 @@
       <form class="site-editor-form" data-site-editor-form>
         <div class="site-editor-fields" data-site-editor-fields></div>
         <div class="site-editor-footer">
+          <button class="ghost-button" type="button" data-cloud-refresh>刷新云端</button>
           <button class="primary-button" type="submit">保存整站</button>
           <p class="save-status" data-site-editor-status aria-live="polite"></p>
         </div>
