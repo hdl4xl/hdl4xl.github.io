@@ -3,36 +3,32 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>hdl4xl LAB</title>
-    <meta name="description" content="hdl4xl 的个人日程、构思与资料存放空间。" />
+    <title>洪都拉斯雪莉 LAB</title>
+    <meta name="description" content="洪都拉斯雪莉 LAB 的个人日程、构思与资料存放空间。" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header" aria-label="主导航">
-      <a class="brand" href="#welcome" aria-label="hdl4xl LAB 首页" data-site-field="brand">hdl4xl LAB</a>
+      <a class="brand" href="#welcome" aria-label="洪都拉斯雪莉 LAB 首页">洪都拉斯雪莉 LAB</a>
+      <nav class="nav-links" aria-label="页面导航">
+        <a href="#schedule">
+          <span>日程安排</span>
+          <small>SCHEDULE</small>
+        </a>
+        <a href="#ideas">
+          <span>构思</span>
+          <small>IDEAS</small>
+        </a>
+        <a href="#resources">
+          <span>资料存放</span>
+          <small>RESOURCES</small>
+        </a>
+      </nav>
       <div class="header-actions">
-        <nav class="nav-links" aria-label="页面导航">
-          <a href="#schedule">
-            <span data-site-field="nav.scheduleLabel">SCHEDULE</span>
-            <small data-site-field="nav.scheduleSub">日程安排</small>
-          </a>
-          <a href="#ideas">
-            <span data-site-field="nav.ideasLabel">IDEAS</span>
-            <small data-site-field="nav.ideasSub">构思</small>
-          </a>
-          <a href="#resources">
-            <span data-site-field="nav.resourcesLabel">RESOURCES</span>
-            <small data-site-field="nav.resourcesSub">资料存放</small>
-          </a>
-          <button class="nav-login" type="button" data-sync-login>
-            <span data-sync-login-label>SYNC</span>
-            <small data-sync-status>公共同步</small>
-          </button>
-          <button class="nav-login nav-update" type="button" data-site-editor-open>
-            <span>EDIT</span>
-            <small>编辑</small>
-          </button>
-        </nav>
+        <button class="nav-login" type="button" data-sync-login>
+          <span data-sync-login-label>公共在线</span>
+          <small data-sync-status>SYNC</small>
+        </button>
         <code class="sync-user-id" data-sync-user-id hidden></code>
       </div>
     </header>
@@ -60,7 +56,7 @@
     <main class="lab-stage">
       <section class="panel panel-cover" id="welcome" data-panel>
         <div class="cover-shell">
-          <p class="eyebrow" data-site-field="home.eyebrow">hdl4xl LAB / HOME</p>
+          <p class="eyebrow" data-site-field="home.eyebrow">SHERRY LAB / HOME</p>
           <h1 data-site-field="home.title">Welcome To My Space</h1>
           <a class="cover-link" href="#schedule" data-site-field="home.cta">ENTER</a>
         </div>
@@ -236,6 +232,13 @@
               <a href="#">旧文章、旧想法和待整理素材</a>
             </li>
           </ul>
+        </div>
+      </section>
+
+      <section class="panel panel-final-art" id="artwork" data-panel aria-label="北斋作品背景">
+        <div class="final-art-caption">
+          <p>葛饰北斋</p>
+          <h2>北斎写真画譜</h2>
         </div>
       </section>
     </main>

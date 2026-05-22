@@ -44,17 +44,17 @@ if (calendarRoot) {
     "2026-06-01": "更新资料与阅读清单\n把常用链接、书单和学习资料按主题整理出来。",
   };
   const defaultSiteContent = {
-    brand: "hdl4xl LAB",
+    brand: "洪都拉斯雪莉 LAB",
     nav: {
-      scheduleLabel: "SCHEDULE",
-      scheduleSub: "日程安排",
-      ideasLabel: "IDEAS",
-      ideasSub: "构思",
-      resourcesLabel: "RESOURCES",
-      resourcesSub: "资料存放",
+      scheduleLabel: "日程安排",
+      scheduleSub: "SCHEDULE",
+      ideasLabel: "构思",
+      ideasSub: "IDEAS",
+      resourcesLabel: "资料存放",
+      resourcesSub: "RESOURCES",
     },
     home: {
-      eyebrow: "hdl4xl LAB / HOME",
+      eyebrow: "SHERRY LAB / HOME",
       title: "Welcome To My Space",
       description: "",
       cta: "ENTER",
@@ -462,12 +462,26 @@ if (calendarRoot) {
     const addBlockButton = event.target.closest("[data-idea-block-add]");
     const deleteBlockButton = event.target.closest("[data-idea-block-delete]");
     const deleteButton = event.target.closest("[data-idea-delete]");
+    const moveButton = event.target.closest("[data-idea-move]");
 
-    if (!deleteButton && !addBlockButton && !deleteBlockButton) {
+    if (!deleteButton && !addBlockButton && !deleteBlockButton && !moveButton) {
       return;
     }
 
     collectEditableSections();
+
+    if (moveButton) {
+      const ideaItem = moveButton.closest("[data-idea-item]");
+      const moved = moveEditorItem("ideas", Number(ideaItem?.dataset.ideaItem), Number(moveButton.dataset.ideaMove));
+
+      if (!moved) {
+        return;
+      }
+
+      applySiteContent();
+      await persistSiteContent(ideaStatus, "构思顺序已同步。", "构思顺序已保存。", "构思顺序已本地保存，云端同步失败。");
+      return;
+    }
 
     if (addBlockButton) {
       const ideaIndex = Number(addBlockButton.dataset.ideaBlockAdd);
@@ -523,12 +537,27 @@ if (calendarRoot) {
 
   resourceList.addEventListener("click", async (event) => {
     const deleteButton = event.target.closest("[data-resource-delete]");
+    const moveButton = event.target.closest("[data-resource-move]");
 
-    if (!deleteButton) {
+    if (!deleteButton && !moveButton) {
       return;
     }
 
     collectEditableSections();
+
+    if (moveButton) {
+      const resourceItem = moveButton.closest("[data-resource-item]");
+      const moved = moveEditorItem("resources", Number(resourceItem?.dataset.resourceItem), Number(moveButton.dataset.resourceMove));
+
+      if (!moved) {
+        return;
+      }
+
+      applySiteContent();
+      await persistSiteContent(resourceStatus, "资料顺序已同步。", "资料顺序已保存。", "资料顺序已本地保存，云端同步失败。");
+      return;
+    }
+
     removeEditorItem("resources", Number(deleteButton.dataset.resourceDelete));
     applySiteContent();
     await persistSiteContent(resourceStatus, "资料已删除并同步。", "资料已删除。", "资料已删除，云端同步失败。");
@@ -664,6 +693,9 @@ if (calendarRoot) {
       const article = document.createElement("article");
       const top = document.createElement("div");
       const label = document.createElement("input");
+      const controls = document.createElement("div");
+      const moveUp = createReorderButton(`上移构思 ${index + 1}`, -1, index === 0, "ideaMove");
+      const moveDown = createReorderButton(`下移构思 ${index + 1}`, 1, index === siteContent.ideas.items.length - 1, "ideaMove");
       const remove = document.createElement("button");
       const title = document.createElement("input");
       const blockTools = document.createElement("div");
@@ -677,6 +709,8 @@ if (calendarRoot) {
       label.value = item.label || `IDEA ${pad(index + 1)}`;
       label.setAttribute("aria-label", "构思编号");
       label.dataset.ideaField = "label";
+
+      controls.className = "item-reorder";
 
       remove.className = "gantt-delete";
       remove.type = "button";
@@ -702,11 +736,25 @@ if (calendarRoot) {
         blocks.append(createIdeaBlock(block, index, blockIndex));
       });
 
-      top.append(label, remove);
+      controls.append(moveUp, moveDown, remove);
+      top.append(label, controls);
       blockTools.append(addBlock);
       article.append(top, title, blockTools, blocks);
       ideaGrid.append(article);
     });
+  }
+
+  function createReorderButton(label, direction, disabled, datasetKey) {
+    const button = document.createElement("button");
+
+    button.className = "reorder-button";
+    button.type = "button";
+    button.textContent = direction < 0 ? "↑" : "↓";
+    button.setAttribute("aria-label", label);
+    button.disabled = disabled;
+    button.dataset[datasetKey] = String(direction);
+
+    return button;
   }
 
   function createIdeaBlock(block, ideaIndex, blockIndex) {
@@ -744,6 +792,9 @@ if (calendarRoot) {
       const fields = document.createElement("div");
       const title = document.createElement("input");
       const url = document.createElement("input");
+      const controls = document.createElement("div");
+      const moveUp = createReorderButton(`上移资料 ${index + 1}`, -1, index === 0, "resourceMove");
+      const moveDown = createReorderButton(`下移资料 ${index + 1}`, 1, index === siteContent.resources.items.length - 1, "resourceMove");
       const remove = document.createElement("button");
 
       row.dataset.resourceItem = String(index);
@@ -772,8 +823,10 @@ if (calendarRoot) {
       remove.setAttribute("aria-label", `删除资料 ${index + 1}`);
       remove.dataset.resourceDelete = String(index);
 
+      controls.className = "item-reorder";
+      controls.append(moveUp, moveDown, remove);
       fields.append(title, url);
-      row.append(label, fields, remove);
+      row.append(label, fields, controls);
       resourceList.append(row);
     });
   }
@@ -1010,6 +1063,19 @@ if (calendarRoot) {
     items.splice(index, 1);
   }
 
+  function moveEditorItem(collectionKey, index, direction) {
+    const items = siteContent[collectionKey]?.items;
+    const nextIndex = index + direction;
+
+    if (!Array.isArray(items) || !Number.isFinite(index) || !Number.isFinite(direction) || nextIndex < 0 || nextIndex >= items.length) {
+      return false;
+    }
+
+    const [item] = items.splice(index, 1);
+    items.splice(nextIndex, 0, item);
+    return true;
+  }
+
   function mergeSiteContent(base, override) {
     const source = override && typeof override === "object" ? override : {};
 
@@ -1024,7 +1090,7 @@ if (calendarRoot) {
         resourcesSub: stringOr(source.nav?.resourcesSub, base.nav.resourcesSub),
       },
       home: {
-        eyebrow: stringOr(source.home?.eyebrow, base.home.eyebrow),
+        eyebrow: normalizeHomeEyebrow(stringOr(source.home?.eyebrow, base.home.eyebrow)),
         title: stringOr(source.home?.title, base.home.title),
         description: stringOr(source.home?.description, base.home.description),
         cta: stringOr(source.home?.cta, base.home.cta),
@@ -1049,6 +1115,10 @@ if (calendarRoot) {
       monthlyPlans: normalizeMonthlyPlans(source.monthlyPlans),
       yearlyPlans: normalizeYearlyPlans(source.yearlyPlans),
     };
+  }
+
+  function normalizeHomeEyebrow(value) {
+    return value.replace("hdl4xl LAB", "SHERRY LAB");
   }
 
   function normalizeCollection(items, fallback, keys) {
@@ -1452,31 +1522,36 @@ if (calendarRoot) {
     syncUserId.hidden = true;
     syncUserId.textContent = "";
     syncLogin.disabled = false;
-    syncLoginLabel.textContent = "SYNC";
-    syncStatus.textContent = "公共同步";
+    syncLoginLabel.textContent = "公共在线";
+    syncStatus.textContent = "SYNC";
+    syncLogin.title = "公共同步";
     updateEditorSyncState("正在连接公共云端。");
 
     if (state === "local") {
-      syncStatus.textContent = "本地模式";
+      syncStatus.textContent = "SYNC";
+      syncLogin.title = "本地模式：公共云端未连接";
       syncLogin.disabled = true;
       updateEditorSyncState("当前是本地模式：内容只能保存在本机，不能同步给其他人。");
       return;
     }
 
     if (state === "loading") {
-      syncStatus.textContent = "同步中";
+      syncStatus.textContent = "SYNC";
+      syncLogin.title = "正在同步公共云端内容";
       syncLogin.disabled = true;
       updateEditorSyncState("正在同步公共云端内容。");
       return;
     }
 
     if (state === "public") {
-      syncStatus.textContent = "公共在线";
+      syncStatus.textContent = "SYNC";
+      syncLogin.title = "公共同步已开启";
       updateEditorSyncState("公共同步已开启：任何人保存后，所有访问者都能看到。");
       return;
     }
 
-    syncStatus.textContent = "连接异常";
+    syncStatus.textContent = "SYNC";
+    syncLogin.title = "连接异常";
     updateEditorSyncState(getCloudErrorMessage(cloud.lastError));
   }
 
@@ -1501,7 +1576,8 @@ if (calendarRoot) {
   }
 
   function showGlobalStatus(message) {
-    syncStatus.textContent = message;
+    syncStatus.textContent = "SYNC";
+    syncLogin.title = message;
 
     if (siteEditor && !siteEditor.hidden) {
       showEditorStatus(message);
