@@ -194,6 +194,7 @@ if (calendarRoot) {
     configured: hasFirebaseConfig(),
     api: null,
     siteContentError: null,
+    lastError: null,
   };
 
   applySiteContent();
@@ -1329,6 +1330,7 @@ if (calendarRoot) {
       try {
         await cloud.api.getRedirectResult(cloud.auth);
       } catch (error) {
+        cloud.lastError = error;
         setSyncState("error");
         console.error(error);
       }
@@ -1337,6 +1339,7 @@ if (calendarRoot) {
         await loadCloudSiteContent({ forceServer: true });
       } catch (error) {
         cloud.siteContentError = error;
+        cloud.lastError = error;
       }
 
       cloud.api.onAuthStateChanged(cloud.auth, async (user) => {
@@ -1353,15 +1356,18 @@ if (calendarRoot) {
         try {
           await refreshCloudContent({ forceServer: true });
         } catch (error) {
-          setSyncState("error");
           cloud.siteContentError = error;
+          cloud.lastError = error;
+          setSyncState("error");
           console.error(error);
           return;
         }
 
+        cloud.lastError = null;
         setSyncState("synced");
       });
     } catch (error) {
+      cloud.lastError = error;
       setSyncState("error");
       console.error(error);
     }
@@ -1508,11 +1514,11 @@ if (calendarRoot) {
     }
 
     syncStatus.textContent = "连接异常";
-    updateEditorSyncState("连接异常：保存可能只在本机生效，请检查登录和 Firebase 规则。");
     if (cloud.user) {
       syncLoginLabel.textContent = "LOGOUT";
       showCurrentUid();
     }
+    updateEditorSyncState(getCloudErrorMessage(cloud.lastError));
   }
 
   function showCurrentUid() {
@@ -1552,6 +1558,24 @@ if (calendarRoot) {
 
   function localOnlyMessage(action) {
     return `${action}；未登录，只保存在本机，线上网页不会更新。`;
+  }
+
+  function getCloudErrorMessage(error) {
+    const uidText = cloud.user?.uid ? `当前登录 UID: ${cloud.user.uid}` : "当前还没有拿到登录 UID";
+
+    if (error?.code === "permission-denied") {
+      return `云端权限不足：请把 Firebase Firestore 规则里的 PASTE_YOUR_UID_HERE 全部替换为你的 UID。${uidText}`;
+    }
+
+    if (error?.code === "unavailable") {
+      return `云端连接失败：请检查手机网络或稍后重试。${uidText}`;
+    }
+
+    if (error?.code === "failed-precondition") {
+      return `Firestore 数据库未就绪或规则配置不完整。${uidText}`;
+    }
+
+    return `连接异常：保存可能只在本机生效，请检查 Firebase 规则。${uidText}`;
   }
 
   function prefersRedirectAuth() {
