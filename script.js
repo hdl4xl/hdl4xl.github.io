@@ -193,6 +193,7 @@ if (calendarRoot) {
     api: null,
     siteContentError: null,
     lastError: null,
+    unsubscribeSchedules: null,
   };
 
   applySiteContent();
@@ -1327,6 +1328,7 @@ if (calendarRoot) {
       cloud.ready = true;
 
       await refreshCloudContent({ forceServer: true });
+      subscribeCloudSchedules();
       cloud.lastError = null;
       setSyncState("public");
     } catch (error) {
@@ -1383,6 +1385,33 @@ if (calendarRoot) {
     const { collection, getDocs, getDocsFromServer } = cloud.api;
     const schedulesRef = collection(cloud.db, "publicSchedules");
     const snapshot = options.forceServer && getDocsFromServer ? await getDocsFromServer(schedulesRef) : await getDocs(schedulesRef);
+
+    applyCloudScheduleSnapshot(snapshot);
+  }
+
+  function subscribeCloudSchedules() {
+    if (cloud.unsubscribeSchedules || !cloud.api?.onSnapshot) {
+      return;
+    }
+
+    const { collection, onSnapshot } = cloud.api;
+    const schedulesRef = collection(cloud.db, "publicSchedules");
+
+    cloud.unsubscribeSchedules = onSnapshot(
+      schedulesRef,
+      (snapshot) => {
+        applyCloudScheduleSnapshot(snapshot);
+        cloud.lastError = null;
+      },
+      (error) => {
+        cloud.lastError = error;
+        setSyncState("error");
+        console.error(error);
+      },
+    );
+  }
+
+  function applyCloudScheduleSnapshot(snapshot) {
     const cloudSchedules = {};
 
     snapshot.forEach((document) => {
@@ -1394,7 +1423,7 @@ if (calendarRoot) {
       }
     });
 
-    schedules = { ...schedules, ...cloudSchedules };
+    schedules = cloudSchedules;
     saveLocalSchedules();
     renderCalendar();
     updateEditor(false);
