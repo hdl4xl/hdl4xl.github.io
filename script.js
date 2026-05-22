@@ -587,7 +587,8 @@ if (calendarRoot) {
         await refreshCloudContent({ forceServer: true });
         showEditorStatus("已从云端刷新最新内容。");
       } catch (error) {
-        showEditorStatus("云端刷新失败，请确认公共读写规则和网络正常。");
+        cloud.lastError = error;
+        showEditorStatus(getCloudErrorMessage(error));
         console.error(error);
       }
     });
@@ -1490,6 +1491,10 @@ if (calendarRoot) {
       return "公共云端权限不足：请把 Firebase Firestore 规则改成允许 siteContent 和 publicSchedules 公共读写。";
     }
 
+    if (error?.code === "not-found") {
+      return "没有找到 Firestore 数据库：请先在 Firebase 左侧 Firestore 中创建数据库。";
+    }
+
     if (error?.code === "unavailable") {
       return "公共云端连接失败：请检查网络或稍后重试。";
     }
@@ -1498,7 +1503,8 @@ if (calendarRoot) {
       return "Firestore 数据库未就绪或规则配置不完整。";
     }
 
-    return "连接异常：保存可能只在本机生效，请检查 Firebase 公共读写规则。";
+    const detail = error?.code ? `错误代码：${error.code}` : "没有返回错误代码";
+    return `连接异常：请检查 Firebase 公共读写规则和 Firestore 是否已创建。${detail}`;
   }
 
   function hasFirebaseConfig() {
